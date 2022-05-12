@@ -9,7 +9,7 @@
                 <div class="card">
                     @if($post->images->count() == 1)
 
-                            <img src="{{$post->images[0]->path}}" class="card-img-top" alt="...">
+                            <img src="{{$post->images[0]->url}}" class="card-img-top" alt="...">
                     @elseif($post->images->count() > 1)
                         @include('partials.carousel', ['id' => $post->id, 'images' => $post->images])
                     @endif
