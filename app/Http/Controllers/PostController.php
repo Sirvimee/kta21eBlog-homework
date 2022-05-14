@@ -7,6 +7,9 @@ use App\Models\Post;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Auth;
+
 
 class PostController extends Controller
 {
@@ -17,7 +20,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::paginate();
+        $posts = Auth::user()->posts()->paginate();
         return view('admin.posts.index', compact('posts'));
     }
 
@@ -39,22 +42,21 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
-
-
-
         $post = new Post($request->validated());
+        $post->user()->associate(Auth::user());
         if($request->has('publish')){
             $post->published_at = Carbon::now();
         }
         $post->save();
-        foreach($request->file('image') as $image) {
-            $path = $image->store('public');
-            $image = new Image();
-            $image->path = $path;
-            $image->post()->associate($post);
-            $image->save();
+        if($request->file('image')) {
+            foreach ($request->file('image') as $image) {
+                $path = $image->store('public');
+                $image = new Image();
+                $image->path = $path;
+                $image->post()->associate($post);
+                $image->save();
+            }
         }
-
         return response()->redirectToRoute('admin.posts.index');
     }
 
@@ -100,12 +102,16 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Post  $post
+     * @param \App\Models\Post $post
      * @return \Illuminate\Http\RedirectResponse
+     * @throws AuthorizationException
      */
     public function destroy(Post $post)
     {
-        $post->delete();
-        return response()->redirectToRoute('admin.posts.index');
+        if(Auth::user() === $post->user) {
+            $post->delete();
+            return response()->redirectToRoute('admin.posts.index');
+        }
+        throw(new AuthorizationException());
     }
 }
