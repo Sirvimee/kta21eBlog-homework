@@ -94,7 +94,7 @@ class Post extends Model
     }
 
     public function getDisplayBodyAttribute(){
-        return nl2br($this->body);
+        return nl2br(htmlspecialchars($this->body));
     }
 
     public function getSnippetAttribute(){
