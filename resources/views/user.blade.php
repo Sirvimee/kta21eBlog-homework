@@ -45,5 +45,13 @@
     </div>
 </div>
 
+<div class="row row-cols-4">
+    @foreach($posts as $post)
+        <div class="col">
+            @include('partials.post-card')
+        </div>
+    @endforeach
+</div>
+
 @endsection
 
