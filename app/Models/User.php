@@ -83,12 +83,13 @@ class User extends Authenticatable
     /**
      * Get the options for generating the slug.
      */
-    public function getSlugOptions() : SlugOptions
+    public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
             ->generateSlugsFrom('name')
             ->saveSlugsTo('slug');
     }
+
     /**
      * Get the route key for the model.
      *
@@ -99,23 +100,33 @@ class User extends Authenticatable
         return 'slug';
     }
 
-    public function posts(){
+    public function posts()
+    {
         return $this->hasMany(Post::class);
     }
 
-    public function comments(){
+    public function comments()
+    {
         return $this->hasMany(Comment::class);
     }
 
-    public function profile(){
+    public function profile()
+    {
         return $this->hasOne(Profile::class);
     }
 
-    public function followers(){
+    public function followers()
+    {
         return $this->belongsToMany(User::class, 'follow', 'user_id', 'follower_id', 'id', 'id', 'users');
     }
-    public function follows(){
-        return $this->belongsToMany(User::class, 'follow','follower_id', 'user_id' , 'id', 'id', 'users');
+
+    public function follows()
+    {
+        return $this->belongsToMany(User::class, 'follow', 'follower_id', 'user_id', 'id', 'id', 'users');
     }
 
+    public function getAmFollowingAttribute()
+    {
+      return $this->followers()->where('follower_id', \Auth::user()->id)->exists();
+    }
 }
